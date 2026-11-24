@@ -63,9 +63,9 @@ enum Dialogs {
       let alert = alert(settings)
       alert.addButton(withTitle: label(settings.ok))
       alert.addButton(withTitle: label(settings.cancel))
-      let field = NSSecureTextField(frame: NSRect(x: 0, y: 0, width: 360, height: 24))
+      let field = PasteableSecureTextField(frame: NSRect(x: 0, y: 0, width: 360, height: 24))
       field.placeholderString = label(settings.prompt)
-      let repeatField = NSSecureTextField(frame: field.frame)
+      let repeatField = PasteableSecureTextField(frame: field.frame)
       repeatField.placeholderString = label(settings.text["SETREPEAT"] ?? "Repeat passphrase")
       NSLayoutConstraint.activate([
         field.widthAnchor.constraint(equalToConstant: 360),
