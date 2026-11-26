@@ -11,7 +11,32 @@ enum Dialogs {
   static func prepare() {
     _ = NSApplication.shared
     NSApp.setActivationPolicy(.accessory)
+    installEditMenu()
     NSApp.activate(ignoringOtherApps: true)
+  }
+
+  // Accessory apps have no main menu, so standard editing key equivalents
+  // (Cmd+V, Cmd+A, ...) never reach text fields. A hidden Edit menu routes
+  // them through the responder chain to the focused field editor.
+  private static func installEditMenu() {
+    guard NSApp.mainMenu == nil else { return }
+    let edit = NSMenu(title: "Edit")
+    let items: [(String, Selector, String)] = [
+      ("Undo", Selector(("undo:")), "z"),
+      ("Redo", Selector(("redo:")), "Z"),
+      ("Cut", #selector(NSText.cut(_:)), "x"),
+      ("Copy", #selector(NSText.copy(_:)), "c"),
+      ("Paste", #selector(NSText.paste(_:)), "v"),
+      ("Select All", #selector(NSText.selectAll(_:)), "a"),
+    ]
+    for (title, action, key) in items {
+      edit.addItem(withTitle: title, action: action, keyEquivalent: key)
+    }
+    let editItem = NSMenuItem()
+    editItem.submenu = edit
+    let main = NSMenu()
+    main.addItem(editItem)
+    NSApp.mainMenu = main
   }
 
   static func alert(_ settings: Settings) -> NSAlert {
@@ -63,9 +88,9 @@ enum Dialogs {
       let alert = alert(settings)
       alert.addButton(withTitle: label(settings.ok))
       alert.addButton(withTitle: label(settings.cancel))
-      let field = PasteableSecureTextField(frame: NSRect(x: 0, y: 0, width: 360, height: 24))
+      let field = NSSecureTextField(frame: NSRect(x: 0, y: 0, width: 360, height: 24))
       field.placeholderString = label(settings.prompt)
-      let repeatField = PasteableSecureTextField(frame: field.frame)
+      let repeatField = NSSecureTextField(frame: field.frame)
       repeatField.placeholderString = label(settings.text["SETREPEAT"] ?? "Repeat passphrase")
       NSLayoutConstraint.activate([
         field.widthAnchor.constraint(equalToConstant: 360),
